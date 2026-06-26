@@ -2,6 +2,11 @@ variable "project_name" {
   type = string
 }
 
+variable "ad_index" {
+  type    = number
+  default = 0
+}
+
 variable "compartment_ocid" {
   type = string
 }

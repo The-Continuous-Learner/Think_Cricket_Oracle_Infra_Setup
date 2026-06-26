@@ -21,6 +21,7 @@ module "compute" {
   subnet_id               = module.networking.subnet_id
   ssh_public_key          = var.ssh_public_key
   app_port                = var.app_port
+  ad_index                = var.ad_index
   oci_namespace           = var.oci_namespace
   oci_artifact_bucket     = var.oci_artifact_bucket
   oci_artifact_key        = var.oci_artifact_key

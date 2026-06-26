@@ -50,6 +50,12 @@ variable "ssh_public_key" {
   default     = ""
 }
 
+variable "ad_index" {
+  description = "Index of the availability domain to use (0, 1, or 2). Change if AD-0 is out of capacity."
+  type        = number
+  default     = 0
+}
+
 # ── Artifact (jar) — OCI Object Storage ──────────────────────────────────────
 variable "oci_namespace" {
   description = "OCI Object Storage namespace (short string, not an OCID)"

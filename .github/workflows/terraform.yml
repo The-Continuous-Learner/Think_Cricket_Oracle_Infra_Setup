@@ -15,6 +15,9 @@ on:
         options: [destroy]
 
 env:
+  # Disable AWS SDK chunked encoding — OCI Object Storage S3-compat does not support it
+  AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+  AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
   TF_VAR_tenancy_ocid:             ${{ secrets.OCI_TENANCY_OCID }}
   TF_VAR_user_ocid:                ${{ secrets.OCI_USER_OCID }}
   TF_VAR_fingerprint:              ${{ secrets.OCI_FINGERPRINT }}
@@ -28,6 +31,7 @@ env:
   TF_VAR_db_url:                   ${{ secrets.DB_URL }}
   TF_VAR_db_username:              ${{ secrets.DB_USERNAME }}
   TF_VAR_db_password:              ${{ secrets.DB_PASSWORD }}
+  TF_VAR_ad_index:                 "1"
 
 jobs:
   plan:

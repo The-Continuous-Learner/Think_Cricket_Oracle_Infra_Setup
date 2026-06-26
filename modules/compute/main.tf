@@ -18,7 +18,7 @@ data "oci_core_images" "oracle_linux_arm" {
 # VM.Standard.A1.Flex with 4 OCPU + 24 GB is permanently free on OCI.
 
 resource "oci_core_instance" "app" {
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
+  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[var.ad_index].name
   compartment_id      = var.compartment_ocid
   display_name        = "${var.project_name}-instance"
   shape               = "VM.Standard.A1.Flex"
