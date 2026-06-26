@@ -1,0 +1,20 @@
+# Copy to terraform.tfvars and fill in values (never commit terraform.tfvars)
+
+# OCI Authentication — from bootstrap steps
+tenancy_ocid     = "ocid1.tenancy.oc1..example"
+user_ocid        = "ocid1.user.oc1..example"
+fingerprint      = "xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx"
+private_key      = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+region           = "ap-mumbai-1"
+compartment_ocid = "ocid1.tenancy.oc1..example"  # same as tenancy for root compartment
+
+# OCI Object Storage — artifact bucket (created in bootstrap, same Customer Secret Key)
+oci_namespace           = "your-namespace"
+oci_artifact_bucket     = "think-cricket-artifacts"
+oci_artifact_access_key = "your-customer-secret-key-id"
+oci_artifact_secret_key = "your-customer-secret-key"
+
+# Database (Supabase)
+db_url      = "jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
+db_username = "postgres.your-project-ref"
+db_password = "your-supabase-password"

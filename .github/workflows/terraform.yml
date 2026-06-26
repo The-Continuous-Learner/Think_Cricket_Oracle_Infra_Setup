@@ -1,0 +1,120 @@
+name: Terraform
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action to run"
+        required: true
+        default: destroy
+        type: choice
+        options: [destroy]
+
+env:
+  TF_VAR_tenancy_ocid:             ${{ secrets.OCI_TENANCY_OCID }}
+  TF_VAR_user_ocid:                ${{ secrets.OCI_USER_OCID }}
+  TF_VAR_fingerprint:              ${{ secrets.OCI_FINGERPRINT }}
+  TF_VAR_private_key:              ${{ secrets.OCI_PRIVATE_KEY }}
+  TF_VAR_region:                   ${{ secrets.OCI_REGION }}
+  TF_VAR_compartment_ocid:         ${{ secrets.OCI_COMPARTMENT_OCID }}
+  TF_VAR_oci_namespace:            ${{ secrets.OCI_NAMESPACE }}
+  TF_VAR_oci_artifact_bucket:      ${{ secrets.OCI_ARTIFACT_BUCKET }}
+  TF_VAR_oci_artifact_access_key:  ${{ secrets.OCI_STATE_ACCESS_KEY }}
+  TF_VAR_oci_artifact_secret_key:  ${{ secrets.OCI_STATE_SECRET_KEY }}
+  TF_VAR_db_url:                   ${{ secrets.DB_URL }}
+  TF_VAR_db_username:              ${{ secrets.DB_USERNAME }}
+  TF_VAR_db_password:              ${{ secrets.DB_PASSWORD }}
+
+jobs:
+  plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.OCI_STATE_BUCKET }}" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=${{ secrets.OCI_REGION }}" \
+            -backend-config="endpoint=https://${{ secrets.OCI_NAMESPACE }}.compat.objectstorage.${{ secrets.OCI_REGION }}.oraclecloud.com" \
+            -backend-config="access_key=${{ secrets.OCI_STATE_ACCESS_KEY }}" \
+            -backend-config="secret_key=${{ secrets.OCI_STATE_SECRET_KEY }}" \
+            -backend-config="skip_region_validation=true" \
+            -backend-config="skip_credentials_validation=true" \
+            -backend-config="skip_metadata_api_check=true" \
+            -backend-config="force_path_style=true"
+
+      - name: Terraform Plan
+        run: terraform plan
+
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.OCI_STATE_BUCKET }}" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=${{ secrets.OCI_REGION }}" \
+            -backend-config="endpoint=https://${{ secrets.OCI_NAMESPACE }}.compat.objectstorage.${{ secrets.OCI_REGION }}.oraclecloud.com" \
+            -backend-config="access_key=${{ secrets.OCI_STATE_ACCESS_KEY }}" \
+            -backend-config="skip_region_validation=true" \
+            -backend-config="skip_credentials_validation=true" \
+            -backend-config="skip_metadata_api_check=true" \
+            -backend-config="force_path_style=true" \
+            -backend-config="secret_key=${{ secrets.OCI_STATE_SECRET_KEY }}"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+  destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.OCI_STATE_BUCKET }}" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=${{ secrets.OCI_REGION }}" \
+            -backend-config="endpoint=https://${{ secrets.OCI_NAMESPACE }}.compat.objectstorage.${{ secrets.OCI_REGION }}.oraclecloud.com" \
+            -backend-config="access_key=${{ secrets.OCI_STATE_ACCESS_KEY }}" \
+            -backend-config="secret_key=${{ secrets.OCI_STATE_SECRET_KEY }}" \
+            -backend-config="skip_region_validation=true" \
+            -backend-config="skip_credentials_validation=true" \
+            -backend-config="skip_metadata_api_check=true" \
+            -backend-config="force_path_style=true"
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
